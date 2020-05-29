@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration status="warn">
+
+    <Properties>
+        <property name="LOG_HOME">@log.home@</property>
+        <property name="FILE_PATTEN">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %class{36} %logger{36} %L %M -- %msg%xEx%n</property>
+        <property name="FILE_AGE">15d</property>
+    </Properties>
+
+    <Appenders>
+
+        <Console name="Console" target="SYSTEM_OUT">
+            <!-- 输出日志的格式 -->
+            <!--<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} &#45;&#45; %msg%xEx%n"/>-->
+            <PatternLayout
+                    pattern="%highlight{%d{HH:mm:ss.SSS} %-5level %logger{36}.%M() @%L - %msg%n}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=black, DEBUG=green bold, TRACE=blue}"/>
+        </Console>
+
+        <RollingRandomAccessFile name="commonAppender"
+                                 immediateFlush="true"
+                                 fileName="${LOG_HOME}/common.log"
+                                 filePattern="${LOG_HOME}/common.%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout charset="UTF-8" pattern="${FILE_PATTEN}"/>
+
+            <Policies>
+                <!--这个interval是根据文件名的格式来计算的，比如 filePattern 里面是 {yyyy-MM-dd} 那么就是每天一份，如果是 {yyyy-MM-dd-HH-mm} 就是每分钟一份-->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="100">
+                <Delete basePath="${LOG_HOME}" maxDepth="1">
+                    <IfFileName glob="common.*.log.gz"/>
+                    <IfLastModified age="${FILE_AGE}"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingRandomAccessFile>
+
+        <RollingRandomAccessFile name="auditAppender"
+                                 immediateFlush="true"
+                                 fileName="${LOG_HOME}/audit.log"
+                                 filePattern="${LOG_HOME}/audit.%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout charset="UTF-8" pattern="${FILE_PATTEN}"/>
+
+            <Policies>
+                <!--这个interval是根据文件名的格式来计算的，比如 filePattern 里面是 {yyyy-MM-dd} 那么就是每天一份，如果是 {yyyy-MM-dd-HH-mm} 就是每分钟一份-->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingRandomAccessFile>
+    </Appenders>
+
+    <Loggers>
+
+        <Logger name="org.springframework" level="info" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="druid.sql" level="info" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="org.hibernate" level="info">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="com.jy.rock.dao" level="info" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="com.jy.rock" level="debug" additivity="false">
+            <AppenderRef ref="commonAppender"/>
+        </Logger>
+
+        <logger name="druid.sql.Statement" level="debug" additivity="false">
+            <AppenderRef ref="Console"/>
+        </logger>
+
+        <logger name="audit" level="info" additivity="false">
+            <AppenderRef ref="auditAppender"/>
+        </logger>
+
+        <Root level="debug">
+            <AppenderRef ref="Console"/>
+        </Root>
+
+    </Loggers>
+
+</Configuration>

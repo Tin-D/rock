@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.rock.dao.CableDao">
+
+    <select id="pagination" resultMap="CableVO">
+        select
+        c.*,
+        cp.id as cp_id, cp.cable_id as cp_cable_id, cp.name as cp_name, cp.order_number as cp_order_number,
+        ei.name as in_equipment_name,
+        eo.name as out_equipment_name
+        from cable c
+        left join cable_point cp on c.id = cp.cable_id
+        left join equipment ei on c.in_equipment_id = ei.id
+        left join equipment eo on c.out_equipment_id = eo.id
+        <where>
+            <if test="query.name != null and query.name != ''">
+                and c.name like concat('%', #{query.name},'%')
+            </if>
+        </where>
+        order by ${query.sortField} ${query.sortOrder}
+    </select>
+
+    <resultMap id="CableVO" type="com.jy.rock.bean.cable.CableVO" autoMapping="true">
+        <id column="id" property="id"/>
+        <collection property="points" ofType="com.jy.rock.domain.CablePoint" columnPrefix="cp_" autoMapping="true">
+            <id column="id" property="id"/>
+        </collection>
+    </resultMap>
+</mapper>

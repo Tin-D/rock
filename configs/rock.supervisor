@@ -1,0 +1,12 @@
+[program:rock]
+command=java -jar /usr/share/jy/rock-0.0.1-SNAPSHOT.jar
+directory=/usr/share/jy
+autostart=true
+stderr_logfile=/var/log/rock/stderr.log
+stdout_logfile=/var/log/rock/stdout.log
+user=root
+redirect_stderr = true
+#stdout 日志文件大小，默认 50MB
+stdout_logfile_maxbytes = 100MB
+#stdout 日志文件备份数
+stdout_logfile_backups = 20

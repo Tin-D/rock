@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.rock.dao.CustomerDao">
+    <select id="paginationIds" resultType="java.lang.String">
+        select id from customer c
+        <where>
+            <if test="query.name != null and query.name != ''">
+                c.name like concat('%', #{query.name}, '%')
+            </if>
+
+            <if test="query.chargeUserFullName != null and query.chargeUserFullName != ''">
+                and c.charge_user_full_name like concat('%', #{query.chargeUserFullName}, '%')
+            </if>
+
+            <if test="query.chargeUserEmail != null and query.chargeUserEmail != ''">
+                and c.charge_user_email like concat('%', #{query.chargeUserEmail} , '%')
+            </if>
+
+            <if test="query.chargeUserPhone != null and query.chargeUserPhone != ''">
+                and (c.charge_user_phone1 = #{query.chargeUserPhone} or
+                c.charge_user_phone2 = #{query.chargeUserPhone} or
+                c.charge_user_phone3 = #{query.chargeUserPhone}
+                )
+            </if>
+        </where>
+        group by c.id
+        order by ${query.sortField} ${query.sortOrder}
+    </select>
+
+    <select id="findPaginationResultByIds" resultMap="CustomerVO">
+        select c.*, cr.id as cr_id, cr.name as cr_name
+        from customer c
+        left join computer_room cr on c.id = cr.customer_id
+        <where>
+            c.id in
+            <foreach collection="ids" open="(" close=")" separator="," item="i">
+                #{i}
+            </foreach>
+        </where>
+    </select>
+
+    <resultMap id="CustomerVO" type="com.jy.rock.bean.customer.CustomerVO" autoMapping="true">
+        <id column="id" property="id"/>
+        <collection property="computerRooms" ofType="com.xmgsd.lan.roadhog.bean.IdNameEntry">
+            <id column="cr_id" property="id"/>
+            <result column="cr_name" property="name"/>
+        </collection>
+    </resultMap>
+
+    <select id="listOptions" resultType="com.xmgsd.lan.roadhog.bean.IdNameEntry">
+        select id, name
+        from customer
+    </select>
+</mapper>

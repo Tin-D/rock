@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.rock.dao.ComputerRoomDao">
+    <select id="paginationIds" resultType="java.lang.String">
+        select cr.id
+        from computer_room cr
+        left join customer c on cr.customer_id = c.id
+        <where>
+            <if test="query.name != null and query.name != ''">
+                cr.name like concat('%', #{query.name}, '%')
+            </if>
+        </where>
+        group by cr.id
+        order by ${query.sortField} ${query.sortOrder}
+    </select>
+
+    <select id="findPaginationResultByIds" resultType="com.jy.rock.bean.cr.ComputerRoomVO">
+        select cr.*, c.name as customer_name
+        from computer_room cr
+        left join customer c on cr.customer_id = c.id
+        <where>
+            cr.id in
+            <foreach collection="ids" open="(" close=")" item="i" separator=",">
+                #{i}
+            </foreach>
+        </where>
+    </select>
+</mapper>

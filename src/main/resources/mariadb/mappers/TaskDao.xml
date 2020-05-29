@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jy.rock.dao.TaskDao">
+    <select id="paginationIds" resultType="java.lang.String">
+        select id from task t
+        <where>
+            <if test="query.code != null and query.code != ''">
+                t.code like concat('%', #{query.code}, '%')
+            </if>
+
+            <if test="query.name != null and query.name != ''">
+                and t.name like concat('%', #{query.name}, '%')
+            </if>
+
+            <if test="query.parentId != null and query.parentId != ''">
+                and t.parent_id like concat('%', #{query.parentId} , '%')
+            </if>
+
+            <if test="query.computerRoomId != null and query.computerRoomId != ''">
+                and t.computer_room_id like concat('%', #{query.computerRoomId} , '%')
+            </if>
+
+            <if test="query.equipmentId != null and query.equipmentId != ''">
+                and t.equipment_id like concat('%', #{query.equipmentId} , '%')
+            </if>
+
+            <if test="query.remark != null and query.remark != ''">
+                and t.remark like concat('%', #{query.remark} , '%')
+            </if>
+
+            <if test="query.createTime != null and query.createTime != ''">
+                and t.create_time like concat('%', #{query.createTime} , '%')
+            </if>
+
+            <if test="query.createUserName != null and query.createUserName != ''">
+                and t.create_user_name like concat('%', #{query.createUserName} , '%')
+            </if>
+
+            <if test="query.createUserFullName != null and query.createUserFullName != ''">
+                and t.create_user_full_name like concat('%', #{query.createUserFullName} , '%')
+            </if>
+
+            <if test="query.finishUserName != null and query.finishUserName != ''">
+                and t.finish_user_name like concat('%', #{query.finishUserName} , '%')
+            </if>
+
+            <if test="query.finishUserFullName != null and query.finishUserFullName != ''">
+                and t.finish_user_full_name like concat('%', #{query.finishUserFullName} , '%')
+            </if>
+
+            <if test="query.finish != null and query.finish != ''">
+                and t.finish like concat('%', #{query.finish} , '%')
+            </if>
+
+            <if test="query.finishTime != null and query.finishTime != ''">
+                and t.finish_time like concat('%', #{query.finishTime} , '%')
+            </if>
+
+        </where>
+        group by t.id
+        order by ${query.sortField} ${query.sortOrder}
+    </select>
+
+    <select id="findPaginationResultByIds" resultMap="TaskVO">
+        select t.*
+        from task t
+        <where>
+            t.id in
+            <foreach collection="ids" open="(" close=")" separator="," item="i">
+                #{i}
+            </foreach>
+        </where>
+    </select>
+
+    <resultMap id="TaskVO" type="com.jy.rock.bean.task.TaskVO" autoMapping="true">
+    </resultMap>
+    <select id="selectByParentId" resultType="com.jy.rock.domain.Task">
+        select * from task where parent_id = #{parentId}
+    </select>
+
+    <update id="finishTaskByParentId">
+        UPDATE task
+        SET finish = true,
+        task_status = "Finish",
+        finish_time = now(),
+        finish_user_id = #{user.id},
+        finish_user_full_name = #{user.fullName},
+        finish_user_name = #{user.username}
+        WHERE parent_id = #{parentId};
+    </update>
+
+    <select id="selectByCode" resultMap="TaskVO">
+        select * from task where code = #{code}
+    </select>
+
+    <delete id="deleteByParentId">
+        delete from task where parent_id = #{parentId}
+    </delete>
+</mapper>
